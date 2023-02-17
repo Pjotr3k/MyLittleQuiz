@@ -1,0 +1,21 @@
+﻿@using MyLittleQuiz.ViewModels
+@model LoginViewModel
+@{
+}
+<h1>I działa ju?</h1>
+
+<form asp-action="Login">
+	<div class="form-group">
+		<label asp-for="Login"></label>
+		<input asp-for="Login"></input>
+		<span asp-validation-for="Login"></span>
+	</div>
+	<div class="form-group">
+		<label asp-for="Password"></label>
+		<input asp-for="Password"></input>
+		<span asp-validation-for="Password"></span>
+	</div>
+	<div class="form-group">
+		<input type="submit" value="Login"></input>
+	</div>
+</form>
