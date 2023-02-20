@@ -1,4 +1,5 @@
 ﻿using MySql.Data.MySqlClient;
+using System.ComponentModel.DataAnnotations;
 
 namespace MyLittleQuiz.Models
 {
@@ -6,13 +7,37 @@ namespace MyLittleQuiz.Models
     {
         public int UserId { get; set; }
         public string Login { get; set; }
+        [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
 
-        public User LogIn(string login, string password)
+        public User DoesExist(int userId, string login, string password, string email, bool allOfThem = true)
         {
             SqlConnection con = new SqlConnection();
             con.databaseConnection.Open();
-            string sqlQuery = $"SELECT idLogon, login, email FROM logons WHERE login='{login}' AND password='{password}'";
+            string AndOr;
+
+            if (allOfThem) AndOr = " AND ";
+            else AndOr = " OR ";
+
+            string sqlQuery = $"SELECT idLogon, login, email FROM logons WHERE ";
+
+            if (userId != 0) sqlQuery += $"idLogon='{userId}'";
+            if (login != null) 
+            {
+                if (userId != 0) sqlQuery += AndOr;
+                sqlQuery += $"login='{login}'";
+            }
+            if (password != null)
+            {
+                if (userId != 0 || login != null) sqlQuery += AndOr;
+                sqlQuery += $"password='{password}'";
+            }
+            if (email != null)
+            {
+                if (userId != 0 || login != null || password != null) sqlQuery += AndOr;
+                sqlQuery += $"email='{email}'";
+            }
+
 
             MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
             MySqlDataReader dr = cmd.ExecuteReader();
@@ -35,8 +60,22 @@ namespace MyLittleQuiz.Models
             con.databaseConnection.Close();
 
             return user;
-
-
         }
+
+        public User SignUp(string login, string password, string email)
+        {
+            User user = new User();
+
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            string sqlQuery = $"SELECT login, email FROM logons WHERE login='{login}' OR email='{email}'";
+
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            return user;
+        }
+
+        
     }
 }

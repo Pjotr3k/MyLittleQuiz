@@ -1,0 +1,32 @@
+﻿@using MyLittleQuiz.ViewModels;
+@model SignupViewModel;
+@{
+}
+
+<form asp-action="Signup">
+	<div class="form-group">
+		<label asp-for="Login"></label>
+		<input asp-for="Login"></input>
+		<span asp-validation-for="Login"></span>
+		@*if(Model.IsLoginTaken){
+			<span>Login is taken</span>
+		}*@
+			</div>
+			<div class="form-group">
+				<label asp-for="Email"></label>
+				<input asp-for="Email"></input>
+				<span asp-validation-for="Email"></span>
+				@*if(Model.IsEmailTaken) {
+					<span>Email is taken</span>
+				}*@
+			</div>
+
+			<div class="form-group">
+				<label asp-for="Password"></label>
+				<input asp-for="Password"></input>
+				<span asp-validation-for="Password"></span>
+			</div>
+			<div class="form-group">
+				<input type="submit" value="Login"></input>
+			</div>
+		</form>

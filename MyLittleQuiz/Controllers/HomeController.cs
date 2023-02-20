@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyLittleQuiz.Models;
+using MyLittleQuiz.ViewModels;
+using Org.BouncyCastle.Security;
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Security.Principal;
 
 namespace MyLittleQuiz.Controllers
 {
@@ -26,11 +29,21 @@ namespace MyLittleQuiz.Controllers
         }
 
         [Authorize]
-        public IActionResult SecretPage()
+        public IActionResult SecretPage(SecretPageViewModel spvm)
         {
+            //private readonly ClaimsPrincipal _principal;
+
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+
+            //ClaimsPrincipal identity = Thread.CurrentPrincipal as ClaimsPrincipal;
+
+            spvm.UserId = identity.Claims.Where(c => c.Type == ClaimTypes.SerialNumber)
+            .Select(c => c.Value).SingleOrDefault();
+            spvm.UserName = identity.Claims.Where(c => c.Type == ClaimTypes.Name)
+            .Select(c => c.Value).SingleOrDefault();
             //ClaimsPrincipal _principal = HttpContext.User;
 
-            return View();
+            return View(spvm);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

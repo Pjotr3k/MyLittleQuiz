@@ -22,7 +22,7 @@ namespace MyLittleQuiz.Controllers
             
             if (ModelState.IsValid)
             {
-                user = user.LogIn(loginVM.Login, loginVM.Password);
+                user = user.DoesExist(0, loginVM.Login, loginVM.Password, null);
 
                 if(user == null)
                 {
@@ -51,8 +51,12 @@ namespace MyLittleQuiz.Controllers
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
+                Thread.CurrentPrincipal = new ClaimsPrincipal(claimsIdentity);
+
                 return RedirectToAction("Index", "Home");
             }
+            
+
             Console.WriteLine(ModelState.IsValid);
             Console.WriteLine(loginVM.Login);
             Console.WriteLine(loginVM.Password);
@@ -65,6 +69,33 @@ namespace MyLittleQuiz.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
             return RedirectToAction(actionName, controllerName);
+        }
+
+        public IActionResult Signup()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Signup(SignupViewModel signupVM)
+        {
+            User user = new User();
+
+            if (ModelState.IsValid)
+            {
+                user = user.DoesExist(0, signupVM.Login, null, signupVM.Email, false);
+
+                if(user != null)
+                {
+                    if (signupVM.Login == user.Login) signupVM.IsLoginTaken = true;
+                    if (signupVM.Email == user.Email) signupVM.IsEmailTaken = true;
+                    return View(signupVM);
+                }
+
+                user.SignUp(signupVM.Login, signupVM.Password, signupVM.Email);
+            }
+
+            return View();
         }
     }
 }
