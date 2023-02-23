@@ -77,6 +77,7 @@ namespace MyLittleQuiz.Controllers
         }
 
         [HttpPost]
+        //public IActionResult Signup(SignupViewModel signupVM)
         public async Task<IActionResult> Signup(SignupViewModel signupVM)
         {
             User user = new User();
@@ -92,7 +93,7 @@ namespace MyLittleQuiz.Controllers
                     return View(signupVM);
                 }
 
-                user.SignUp(signupVM.Login, signupVM.Password, signupVM.Email);
+                MyLittleQuiz.Models.User.SignUp(signupVM.Login, signupVM.Password, signupVM.Email);
             }
 
             return View();

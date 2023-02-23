@@ -1,5 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
 
 namespace MyLittleQuiz.Models
 {
@@ -62,18 +63,25 @@ namespace MyLittleQuiz.Models
             return user;
         }
 
-        public User SignUp(string login, string password, string email)
+        public static void SignUp(string login, string password, string email)
         {
             User user = new User();
 
             SqlConnection con = new SqlConnection();
+            MySqlDataAdapter adp = new MySqlDataAdapter();
+
             con.databaseConnection.Open();
-            string sqlQuery = $"SELECT login, email FROM logons WHERE login='{login}' OR email='{email}'";
+            string sqlQuery = $"INSERT INTO `logons`(`login`, `email`, `password`) VALUES ('{login}','{email}','{password}')";
 
             MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
-            MySqlDataReader dr = cmd.ExecuteReader();
+            adp.InsertCommand = cmd;
+            adp.InsertCommand.ExecuteNonQuery();
+            con.databaseConnection.Close();
 
-            return user;
+            user.Login = login;
+            user.Email = email;
+
+            //return user;
         }
 
         
