@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Principal;
 
 namespace MyLittleQuiz.Models
 {
@@ -9,7 +11,9 @@ namespace MyLittleQuiz.Models
         public int UserId { get; set; }
         public string Login { get; set; }
         [DataType(DataType.EmailAddress)]
-        public string Email { get; set; }
+        public string Email { get; set; }        
+        //private readonly HttpContextAccessor httpAccess;
+        public ClaimsPrincipal Principal { get; set; }
 
         public User DoesExist(int userId, string login, string password, string email, bool allOfThem = true)
         {
@@ -82,6 +86,28 @@ namespace MyLittleQuiz.Models
             user.Email = email;
 
             //return user;
+        }
+
+        public User GetUserByClaims()
+        {
+            User user = new User();
+
+            //var Principal = httpAccess.HttpContext.User as ClaimsPrincipal;
+            //Principal = hAccess.HttpContext.User as ClaimsPrincipal;
+
+            if (Principal.Identity.IsAuthenticated)
+            {
+                user.UserId = Convert.ToInt32(Principal.Claims.Where(c => c.Type == ClaimTypes.SerialNumber)
+                    .Select(c => c.Value).SingleOrDefault());
+                user.Login = Principal.Claims.Where(c => c.Type == ClaimTypes.Name)
+                    .Select(c => c.Value).SingleOrDefault();
+                user.Email = Principal.Claims.Where(c => c.Type == ClaimTypes.Email)
+                    .Select(c => c.Value).SingleOrDefault();
+
+                return user;
+            }
+
+            return null;
         }
 
         
