@@ -25,22 +25,21 @@ namespace MyLittleQuiz.Controllers
             ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
 
             Models.User user = new User();
+            user.Principal = identity;
 
-            user.UserId = Convert.ToInt32(identity.Claims.Where(c => c.Type == ClaimTypes.SerialNumber)
-            .Select(c => c.Value).SingleOrDefault());
-            user.Login = identity.Claims.Where(c => c.Type == ClaimTypes.Name)
-            .Select(c => c.Value).SingleOrDefault();
-            user.Email = identity.Claims.Where(c => c.Type == ClaimTypes.Email)
-            .Select(c => c.Value).SingleOrDefault();
+            user = user.GetUserByClaims();
+
 
             if (createVM.Description != null) quiz = quiz.AddQuiz(createVM.Name, user, createVM.Description);
             else quiz = quiz.AddQuiz(createVM.Name, user);
 
-            return View();
+
+
+            return RedirectToAction("Detail", "Quiz", new { id = quiz.Id });
         }
 
         
-        public IActionResult Details(string id)
+        public IActionResult Detail(int id)
         {
             Models.User user = new User();
             Quiz quiz = new Quiz();
@@ -51,25 +50,17 @@ namespace MyLittleQuiz.Controllers
             ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
             user.Principal = identity;
             user = user.GetUserByClaims();
+            detailVM.Quiz = quiz.GetQuizById(id);
 
-            if(!quiz.Moderators.Any(m => m == user)) detailVM.IsModerator = true;
+            
 
-            if (!quiz.IsPublic && !detailVM.IsModerator) RedirectToAction("Index", "Home");
+            if(detailVM.Quiz.Moderators.Any(m => m.UserId == user.UserId)) detailVM.IsModerator = true;
 
-            /*
-             * ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
-
-            if (identity.Identity.IsAuthenticated){
-                user.UserId = Convert.ToInt32(identity.Claims.Where(c => c.Type == ClaimTypes.SerialNumber)
-            .Select(c => c.Value).SingleOrDefault());
-                user.Login = identity.Claims.Where(c => c.Type == ClaimTypes.Name)
-                .Select(c => c.Value).SingleOrDefault();
-                user.Email = identity.Claims.Where(c => c.Type == ClaimTypes.Email)
-                .Select(c => c.Value).SingleOrDefault();
-            }
-            */
-
-            return View();
+            if (quiz.IsPublic || detailVM.IsModerator) return View(detailVM);
+                
+            return RedirectToAction("Index", "Home");
+            
+            
         }
 
     }

@@ -56,7 +56,7 @@ namespace MyLittleQuiz.Models
 
             quiz.AddModerator(creatorId, true);
 
-            return quiz;
+            return quiz.GetQuizById(quiz.Id);
         }
 
         public void AddModerator(int modId, bool isCreator = false)
@@ -112,6 +112,68 @@ namespace MyLittleQuiz.Models
             con.databaseConnection.Close();
 
             return quiz;
+        }
+
+        public Quiz GetQuizById(int quizId)
+        {
+            string sqlQuery = $"SELECT * FROM quizzes WHERE QuizId='{quizId}'";
+            User user = new User();
+            //user = user.DoesExist(creatorId, null, null, null);
+            Quiz quiz = new Quiz();
+
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            if (!dr.HasRows)
+            {
+                con.databaseConnection.Close();
+                return null;
+            }
+
+            if (dr.Read())
+            {
+                quiz.Id = Convert.ToInt32(dr["QuizId"]);
+                quiz.Name = dr["Name"].ToString();
+                quiz.Description = dr["Description"].ToString();
+                int creatorId = Convert.ToInt32(dr["CreatorId"]);
+                quiz.Creator = user.DoesExist(creatorId, null, null, null);
+                quiz.IsPublic = Convert.ToBoolean(dr["IsPublic"]);
+                quiz.CreationDate = DateTime.Parse(dr["CreationDate"].ToString());
+                quiz.LastModification = DateTime.Parse(dr["LastModification"].ToString());
+            }
+
+            quiz.Moderators = quiz.PopulateModerators();
+
+            return quiz;
+        }
+
+        public List<User> PopulateModerators()
+        {
+            List<User> mods = new List<User>();
+            string sqlQuery = $"SELECT * FROM moderators WHERE IdQuiz='{this.Id}'";
+
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            if (!dr.HasRows)
+            {
+                con.databaseConnection.Close();
+                return null;
+            }
+
+            while (dr.Read())
+            {
+                User u = new User();
+                int modId = Convert.ToInt32(dr["IdUser"]);
+                u = u.DoesExist(modId, null, null, null);
+                mods.Add(u);
+            }
+
+            return mods;
         }
     }
 }

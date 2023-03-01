@@ -15,6 +15,8 @@ namespace MyLittleQuiz.Models
         //private readonly HttpContextAccessor httpAccess;
         public ClaimsPrincipal Principal { get; set; }
 
+        
+
         public User DoesExist(int userId, string login, string password, string email, bool allOfThem = true)
         {
             SqlConnection con = new SqlConnection();
@@ -91,6 +93,7 @@ namespace MyLittleQuiz.Models
         public User GetUserByClaims()
         {
             User user = new User();
+            //user.Principal =  as ClaimsPrincipal;
 
             //var Principal = httpAccess.HttpContext.User as ClaimsPrincipal;
             //Principal = hAccess.HttpContext.User as ClaimsPrincipal;

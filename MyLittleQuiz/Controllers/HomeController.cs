@@ -34,13 +34,14 @@ namespace MyLittleQuiz.Controllers
             //private readonly ClaimsPrincipal _principal;
 
             ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+            Models.User user = new Models.User();
+            user.Principal = identity;
+            user = user.GetUserByClaims();
 
             //ClaimsPrincipal identity = Thread.CurrentPrincipal as ClaimsPrincipal;
 
-            spvm.UserId = identity.Claims.Where(c => c.Type == ClaimTypes.SerialNumber)
-            .Select(c => c.Value).SingleOrDefault();
-            spvm.UserName = identity.Claims.Where(c => c.Type == ClaimTypes.Name)
-            .Select(c => c.Value).SingleOrDefault();
+            spvm.UserId = user.UserId.ToString();
+            spvm.UserName = user.Login;
             //ClaimsPrincipal _principal = HttpContext.User;
 
             return View(spvm);
