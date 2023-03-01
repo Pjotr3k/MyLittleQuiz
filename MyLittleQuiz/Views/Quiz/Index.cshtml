@@ -1,0 +1,15 @@
+﻿@using MyLittleQuiz.ViewModels;
+@model IndexQuizViewModel;
+@{
+}
+
+<div>
+	@foreach(var q in Model.quizzes){
+		<div class="card-body">
+			<h5 class="h5"><strong>@q.Name</strong> <span class="text-muted">by @q.Creator.Login</span></h5>
+			<p>@q.Description</p>
+			<h8 class="text-muted">Created: @q.CreationDate</h8>
+			<a class="btn-outline-secondary" asp-area="" asp-controller="Quiz" asp-action="Detail" asp-route-id="@q.Id">(see details)</a>
+		</div>
+	}
+</div>

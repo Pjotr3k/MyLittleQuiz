@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Xml.Linq;
 using MySql.Data.MySqlClient;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace MyLittleQuiz.Models
 {
@@ -17,9 +18,10 @@ namespace MyLittleQuiz.Models
         public bool IsPublic { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime LastModification { get; set; }
+        public ClaimsPrincipal Principal { get; set; }
 
-        
-        
+
+
         public Quiz AddQuiz(string name, User creator, string description = null)
         {
             User user = new User();
@@ -114,11 +116,56 @@ namespace MyLittleQuiz.Models
             return quiz;
         }
 
+        public List<Quiz> GetAllQuizzes()
+        {
+            List<Quiz> quizzes = new List<Quiz>();
+
+            string sqlQuery = $"SELECT * FROM quizzes";
+            User user = new User();
+            //Quiz quiz = new Quiz();
+
+            User currentUser = new User();
+            currentUser.Principal = this.Principal;
+            currentUser = currentUser.GetUserByClaims();
+
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            if (!dr.HasRows)
+            {
+                con.databaseConnection.Close();
+                return null;
+            }
+
+            while (dr.Read())
+            {
+                Quiz quiz = new Quiz();
+
+                quiz.Id = Convert.ToInt32(dr["QuizId"]);
+                quiz.Name = dr["Name"].ToString();
+                quiz.Description = dr["Description"].ToString();
+                int creatorId = Convert.ToInt32(dr["CreatorId"]);
+                quiz.Creator = user.DoesExist(creatorId, null, null, null);
+                quiz.IsPublic = Convert.ToBoolean(dr["IsPublic"]);
+                quiz.CreationDate = DateTime.Parse(dr["CreationDate"].ToString());
+                quiz.LastModification = DateTime.Parse(dr["LastModification"].ToString());
+
+                quiz.Moderators = quiz.PopulateModerators();
+
+                if (quiz.IsPublic) quizzes.Add(quiz);
+                else if (quiz.Moderators.Any(m => m.UserId == currentUser.UserId)) quizzes.Add(quiz);
+
+            }
+
+            return quizzes;
+        }
+
         public Quiz GetQuizById(int quizId)
         {
             string sqlQuery = $"SELECT * FROM quizzes WHERE QuizId='{quizId}'";
             User user = new User();
-            //user = user.DoesExist(creatorId, null, null, null);
             Quiz quiz = new Quiz();
 
             SqlConnection con = new SqlConnection();
@@ -143,6 +190,8 @@ namespace MyLittleQuiz.Models
                 quiz.CreationDate = DateTime.Parse(dr["CreationDate"].ToString());
                 quiz.LastModification = DateTime.Parse(dr["LastModification"].ToString());
             }
+
+            con.databaseConnection.Close();
 
             quiz.Moderators = quiz.PopulateModerators();
 

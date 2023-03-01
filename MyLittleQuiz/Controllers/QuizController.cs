@@ -9,6 +9,20 @@ namespace MyLittleQuiz.Controllers
     
     public class QuizController : Controller
     {
+        public IActionResult Index()
+        {
+            IndexQuizViewModel iqvm = new IndexQuizViewModel();
+            Quiz quiz = new Quiz();
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+
+            quiz.Principal = identity;
+
+            iqvm.quizzes = quiz.GetAllQuizzes();
+
+
+            return View(iqvm);
+        }
+
         [Authorize]
         public IActionResult Create()
         {
@@ -38,7 +52,7 @@ namespace MyLittleQuiz.Controllers
             return RedirectToAction("Detail", "Quiz", new { id = quiz.Id });
         }
 
-        
+        [AllowAnonymous]
         public IActionResult Detail(int id)
         {
             Models.User user = new User();
