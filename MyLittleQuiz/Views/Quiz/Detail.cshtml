@@ -6,6 +6,26 @@
 
 <h1>@Model.Quiz.Name</h1>
 <div>
-    @Model.IsModerator.ToString();
+    <div>
+        <p>@Model.Quiz.Description</p>
+    </div>
+    <div>
+        <div>
+            <ul>
+                <li>Creator: @Model.Quiz.Creator.Login</li>
+                <li>Created: @Model.Quiz.CreationDate.ToLongDateString()</li>
+                <li>Creator: @Model.Quiz.LastModification.ToLongDateString()</li>
+            </ul>
+            <br />
+            <h6>Ediotors:</h6>
+            <ul>
+                @foreach(var mod in Model.Quiz.Moderators){
+                    <li>@mod.Login</li>
+                }
+                
+                
+            </ul>
+        </div>
+    </div>
 
 </div>
