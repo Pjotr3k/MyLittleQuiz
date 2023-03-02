@@ -25,7 +25,7 @@ namespace MyLittleQuiz.Models
         public Quiz AddQuiz(string name, User creator, string description = null)
         {
             User user = new User();
-            string creationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string creationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             
             int creatorId = creator.UserId;
             Quiz quiz = new Quiz();
@@ -36,7 +36,7 @@ namespace MyLittleQuiz.Models
             if (description != null)
             {
                 sqlQuery = $"INSERT INTO `quizzes`(Name, Description, IsPublic, CreatorId, CreationDate, LastModification) " +
-                    $"VALUES ('{name}','{description}', 0, {creatorId}, '{creationTime}', '{creationTime}')";
+                    $"VALUES ('{name}', '{description}', 0, {creatorId}, '{creationTime}', '{creationTime}')";
             }
             else
             {
@@ -56,7 +56,7 @@ namespace MyLittleQuiz.Models
 
             quiz = quiz.ReturnCreatedQuiz(name, creatorId, creationTime);
 
-            quiz.AddModerator(creatorId, true);
+            //quiz.AddModerator(creatorId, true);
 
             return quiz.GetQuizById(quiz.Id);
         }
@@ -82,7 +82,7 @@ namespace MyLittleQuiz.Models
             Quiz quiz = new Quiz();
 
             string sqlQuery = $"SELECT * FROM quizzes WHERE Name='{name}' AND CreatorId={creatorId} AND CreationDate='{creationTime}'";
-            string datePattern = "yy-MM-ddyyyy-MM-dd HH:mm:ss";
+            string datePattern = "yyyy-MM-dd HH:mm:ss";
             User user = new User();
             user = user.DoesExist(creatorId, null, null, null);
 
@@ -198,6 +198,8 @@ namespace MyLittleQuiz.Models
             return quiz;
         }
 
+        //---------***-MODERATORS RELATED METHODS-***------------------------
+
         public List<User> PopulateModerators()
         {
             List<User> mods = new List<User>();
@@ -223,6 +225,21 @@ namespace MyLittleQuiz.Models
             }
 
             return mods;
+        }
+
+        public void DeleteModerator(int modId)
+        {
+            string sqlQuery = $"DELETE FROM moderators WHERE IdQuiz={this.Id} AND IdUser={modId} AND IsCreator=0";
+
+            SqlConnection con = new SqlConnection();
+            MySqlDataAdapter adp = new MySqlDataAdapter();
+
+            con.databaseConnection.Open();
+
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            adp.InsertCommand = cmd;
+            adp.InsertCommand.ExecuteNonQuery();
+            con.databaseConnection.Close();
         }
     }
 }

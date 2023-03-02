@@ -70,11 +70,28 @@ namespace MyLittleQuiz.Controllers
 
             if(detailVM.Quiz.Moderators.Any(m => m.UserId == user.UserId)) detailVM.IsModerator = true;
 
-            if (quiz.IsPublic || detailVM.IsModerator) return View(detailVM);
+            if (detailVM.Quiz.IsPublic || detailVM.IsModerator) return View(detailVM);
                 
             return RedirectToAction("Index", "Home");
             
             
+        }
+
+        [Authorize]        
+        public async Task<IActionResult> DeleteMod(int id, int quizId, Uri previousPage)
+        {
+            Quiz quiz = new Quiz();
+            quiz = quiz.GetQuizById(quizId);
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+            quiz.Principal = identity;
+
+            if(quiz.Creator.UserId != id)
+            {
+                quiz.DeleteModerator(id);                
+            }
+
+            return RedirectToAction("Index", "Quiz");
+
         }
 
     }
