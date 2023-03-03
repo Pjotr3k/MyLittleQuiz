@@ -25,7 +25,8 @@ namespace MyLittleQuiz.Models
         public Quiz AddQuiz(string name, User creator, string description = null)
         {
             User user = new User();
-            string creationTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            DateTime fullCreationTime = DateTime.Now;
+            string creationTime = fullCreationTime.ToString("yyyy-MM-dd HH:mm:ss.fff");
             
             int creatorId = creator.UserId;
             Quiz quiz = new Quiz();
@@ -54,7 +55,7 @@ namespace MyLittleQuiz.Models
             adp.InsertCommand.ExecuteNonQuery();
             con.databaseConnection.Close();
 
-            quiz = quiz.ReturnCreatedQuiz(name, creatorId, creationTime);
+            quiz = quiz.ReturnCreatedQuiz(name, creatorId, fullCreationTime.ToString("yyyy-MM-dd HH:mm:ss"));
 
             //quiz.AddModerator(creatorId, true);
 
