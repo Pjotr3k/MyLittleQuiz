@@ -13,6 +13,7 @@ namespace MyLittleQuiz.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public List<Question> Questions { get; set; }
+        public List<ScorePool> ScorePools { get; set; }
         public User Creator { get; set; }
         public List<User> Moderators { get; set; }
         public bool IsPublic { get; set; }
@@ -59,24 +60,13 @@ namespace MyLittleQuiz.Models
 
             //quiz.AddModerator(creatorId, true);
 
+            //ScorePool pool = new ScorePool();
+            //quiz.ScorePools = ScorePool.GetPoolsByQuiz(quiz);
+
             return quiz.GetQuizById(quiz.Id);
         }
 
-        public void AddModerator(int modId, bool isCreator = false)
-        {
-            string sqlQuery = $"INSERT INTO moderators(IdQuiz, IdUser, IsCreator) VALUES ({this.Id}, {modId}, {Convert.ToInt32(isCreator)})";
-
-            SqlConnection con = new SqlConnection();
-            MySqlDataAdapter adp = new MySqlDataAdapter();
-
-            con.databaseConnection.Open();
-
-            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
-            adp.InsertCommand = cmd;
-            adp.InsertCommand.ExecuteNonQuery();
-            con.databaseConnection.Close();
-
-        }
+        
 
         public Quiz ReturnCreatedQuiz(string name, int creatorId, string creationTime)
         {
@@ -107,6 +97,9 @@ namespace MyLittleQuiz.Models
                 quiz.IsPublic = Convert.ToBoolean(dr["IsPublic"]);
                 quiz.CreationDate = DateTime.Parse(creationTime);
                 quiz.LastModification = DateTime.Parse(creationTime);
+                quiz.Moderators = quiz.PopulateModerators();
+
+                quiz.ScorePools = ScorePool.GetPoolsByQuiz(quiz);
 
                 //quiz.CreationDate = DateTime.ParseExact(dr["CreationDate"].GetTime, datePattern, CultureInfo.InvariantCulture);
                 //quiz.LastModification = DateTime.ParseExact(dr["LastModification"].ToString(), datePattern, CultureInfo.InvariantCulture);                
@@ -154,14 +147,22 @@ namespace MyLittleQuiz.Models
                 quiz.LastModification = DateTime.Parse(dr["LastModification"].ToString());
 
                 quiz.Moderators = quiz.PopulateModerators();
+                quiz.ScorePools = ScorePool.GetPoolsByQuiz(quiz);
 
                 if (quiz.IsPublic) quizzes.Add(quiz);
-                else if (quiz.Moderators.Any(m => m.UserId == currentUser.UserId)) quizzes.Add(quiz);
+                else {
+                    if (Principal.Identity.IsAuthenticated)
+                    {
+                        if (quiz.Moderators.Any(m => m.UserId == currentUser.UserId)) quizzes.Add(quiz);
+                    }
+                }
 
             }
 
             return quizzes;
         }
+
+      
 
         public Quiz GetQuizById(int quizId)
         {
@@ -190,6 +191,7 @@ namespace MyLittleQuiz.Models
                 quiz.IsPublic = Convert.ToBoolean(dr["IsPublic"]);
                 quiz.CreationDate = DateTime.Parse(dr["CreationDate"].ToString());
                 quiz.LastModification = DateTime.Parse(dr["LastModification"].ToString());
+                quiz.ScorePools = ScorePool.GetPoolsByQuiz(quiz);
             }
 
             con.databaseConnection.Close();
@@ -200,6 +202,22 @@ namespace MyLittleQuiz.Models
         }
 
         //---------***-MODERATORS RELATED METHODS-***------------------------
+
+        public void AddModerator(int modId, bool isCreator = false)
+        {
+            string sqlQuery = $"INSERT INTO moderators(IdQuiz, IdUser, IsCreator) VALUES ({this.Id}, {modId}, {Convert.ToInt32(isCreator)})";
+
+            SqlConnection con = new SqlConnection();
+            MySqlDataAdapter adp = new MySqlDataAdapter();
+
+            con.databaseConnection.Open();
+
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            adp.InsertCommand = cmd;
+            adp.InsertCommand.ExecuteNonQuery();
+            con.databaseConnection.Close();
+
+        }
 
         public List<User> PopulateModerators()
         {

@@ -29,10 +29,19 @@
                         }
                         
                     </li>
-                }
-                
-                
+                }    
             </ul>
+            @if(Model.IsModerator)
+            {
+                <div>
+                <h6>Score pools</h6>
+                @foreach(var sp in Model.Quiz.ScorePools){
+                    <li>
+                        @sp.Name
+                    </li>
+                }
+            </div>
+            }
         </div>
     </div>
 

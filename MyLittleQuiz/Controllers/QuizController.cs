@@ -66,15 +66,15 @@ namespace MyLittleQuiz.Controllers
             user = user.GetUserByClaims();
             detailVM.Quiz = quiz.GetQuizById(id);
 
-            
 
-            if(detailVM.Quiz.Moderators.Any(m => m.UserId == user.UserId)) detailVM.IsModerator = true;
+            if (identity != null && identity.Identity.IsAuthenticated)
+            {
+                if (detailVM.Quiz.Moderators.Any(m => m.UserId == user.UserId)) detailVM.IsModerator = true;
+            }
 
             if (detailVM.Quiz.IsPublic || detailVM.IsModerator) return View(detailVM);
                 
-            return RedirectToAction("Index", "Home");
-            
-            
+            return RedirectToAction("Index", "Home");            
         }
 
         [Authorize]        
@@ -90,9 +90,26 @@ namespace MyLittleQuiz.Controllers
                 quiz.DeleteModerator(id);                
             }
 
-            return RedirectToAction("Index", "Quiz");
+            return RedirectToAction("Detail", "Quiz", quiz.Id);
 
         }
+
+        /*[Authorize]
+        public async Task<IActionResult> AddPool(DetailQuizViewModel dqvm)
+        {
+            //Quiz quiz = new Quiz();
+            //quiz = quiz.GetQuizById(quizId);
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+            dqvm.Quiz.Principal = identity;
+
+            if (dqvm.IsModerator)
+            {
+                ScorePool.AddPool();
+            }
+
+            return RedirectToAction("Index", "Quiz");
+
+        }*/
 
     }
 }
