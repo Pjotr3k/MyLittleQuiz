@@ -8,7 +8,7 @@ namespace MyLittleQuiz.Models
         public string Name { get; set; }
         public Quiz Quiz { get; set; }
 
-        public static void AddPool(int name, int quizId)
+        public static void AddPool(string name, int quizId)
         {
             string sqlQuery = $"INSERT INTO score_pools(Name, IdQuiz) VALUES ('{name}', {quizId})";
 

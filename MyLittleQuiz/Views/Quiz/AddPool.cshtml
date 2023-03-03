@@ -1,0 +1,16 @@
+﻿@using MyLittleQuiz.ViewModels
+@model AddPoolQuizViewModel
+@{
+	
+}
+
+<form asp-action="AddPool">
+	<div class="form-group">
+		<label asp-for="Name"></label>
+		<input asp-for="Name"></input>
+		<span asp-validation-for="Name"></span>
+	</div>
+	<div class="form-group">
+		<input asp-route-id=@Model.QuizId type="submit" value="Add New Pool"></input>
+	</div>
+</form>

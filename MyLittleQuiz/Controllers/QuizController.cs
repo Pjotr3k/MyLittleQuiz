@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MyLittleQuiz.Models;
 using MyLittleQuiz.ViewModels;
 using System.Security.Claims;
 
 namespace MyLittleQuiz.Controllers
 {
-    
+    [Authorize]
     public class QuizController : Controller
     {
+        [AllowAnonymous]
         public IActionResult Index()
         {
             IndexQuizViewModel iqvm = new IndexQuizViewModel();
@@ -94,22 +96,50 @@ namespace MyLittleQuiz.Controllers
 
         }
 
-        /*[Authorize]
-        public async Task<IActionResult> AddPool(DetailQuizViewModel dqvm)
+        
+        public IActionResult AddPool(int id)
+        {
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+
+            User user = new User();
+            user.Principal = identity;
+            user = user.GetUserByClaims();
+            
+            Quiz quiz = new Quiz();
+            quiz.Principal = identity;
+            quiz = quiz.GetQuizById(id);
+
+            AddPoolQuizViewModel apqvm = new AddPoolQuizViewModel();
+
+            if(quiz.Moderators.Any(m => m.UserId == user.UserId))
+            {
+                apqvm.QuizId = quiz.Id;
+
+                return View(apqvm);
+            }
+
+            return RedirectToAction("Detail", "Quiz", id);
+
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddPool(int id, AddPoolQuizViewModel apqvm)
         {
             //Quiz quiz = new Quiz();
             //quiz = quiz.GetQuizById(quizId);
-            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
-            dqvm.Quiz.Principal = identity;
+            //ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+            //dqvm.Quiz.Principal = identity;
+            apqvm.QuizId = id;
 
-            if (dqvm.IsModerator)
+            if (ModelState.IsValid)
             {
-                ScorePool.AddPool();
+                ScorePool.AddPool(apqvm.Name, apqvm.QuizId);
             }
 
-            return RedirectToAction("Index", "Quiz");
+            return RedirectToAction("Detail", "Quiz", new { id = apqvm.QuizId});
 
-        }*/
+        }
 
     }
 }
