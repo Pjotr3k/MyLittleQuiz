@@ -92,7 +92,7 @@ namespace MyLittleQuiz.Controllers
                 quiz.DeleteModerator(id);                
             }
 
-            return RedirectToAction("Detail", "Quiz", quiz.Id);
+            return RedirectToAction("Detail", "Quiz", new { id = quizId });
 
         }
 
@@ -138,6 +138,56 @@ namespace MyLittleQuiz.Controllers
             }
 
             return RedirectToAction("Detail", "Quiz", new { id = apqvm.QuizId});
+
+        }
+
+        public IActionResult AddMod(int id)
+        {
+            ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+
+            User user = new User();
+            user.Principal = identity;
+            user = user.GetUserByClaims();
+
+            Quiz quiz = new Quiz();
+            quiz.Principal = identity;
+            quiz = quiz.GetQuizById(id);
+
+            AddModQuizViewModel amqvm = new AddModQuizViewModel();
+            
+
+            if (quiz.Moderators.Any(m => m.UserId == user.UserId))
+            {
+                amqvm.Users = Models.User.GetAllUsers();
+                amqvm.QuizId = quiz.Id;
+
+                return View(amqvm);
+            }
+
+            return RedirectToAction("Detail", "Quiz", id);
+
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> AddMod(int id, AddPoolQuizViewModel amqvm)
+        {
+            //Quiz quiz = new Quiz();
+            //quiz = quiz.GetQuizById(quizId);
+            //ClaimsPrincipal identity = HttpContext.User as ClaimsPrincipal;
+            //dqvm.Quiz.Principal = identity;
+            //amqvm.QuizId = id;
+            Models.User user = new User();
+            Quiz quiz = new Quiz();
+            quiz = quiz.GetQuizById(id);
+            user = user.DoesExist(0, amqvm.Name, null, null);
+
+            if (ModelState.IsValid)
+            {
+                quiz.AddModerator(user.UserId);
+            }
+
+            return RedirectToAction("Detail", "Quiz", new { id = id });
 
         }
 

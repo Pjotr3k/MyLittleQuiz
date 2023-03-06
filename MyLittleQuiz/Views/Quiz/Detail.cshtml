@@ -31,6 +31,11 @@
                     </li>
                 }    
             </ul>
+            @if (Model.IsModerator)
+            {
+                <a class="btn btn-danger" asp-route-id="@Model.Quiz.Id" asp-controller="Quiz" asp-action="AddMod">Add editor</a>
+            }
+
             @if(Model.IsModerator)
             {
                 <div>

@@ -16,6 +16,40 @@ namespace MyLittleQuiz.Models
         public ClaimsPrincipal Principal { get; set; }
 
         
+        public static List<User> GetAllUsers()
+        {
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            string sqlQuery = $"SELECT * FROM logons";
+
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+            List<User> users = new List<User>();
+
+            if (!dr.HasRows)
+            {
+                con.databaseConnection.Close();
+                return null;
+            }
+
+            
+
+            while (dr.Read())
+            {
+                User user = new User();
+
+                user.UserId = Convert.ToInt32(dr["idLogon"]);
+                user.Login = dr["login"].ToString();
+                user.Email = dr["email"].ToString();
+
+                users.Add(user);
+            }
+
+            con.databaseConnection.Close();
+
+            return users;
+
+        }
 
         public User DoesExist(int userId, string login, string password, string email, bool allOfThem = true)
         {
