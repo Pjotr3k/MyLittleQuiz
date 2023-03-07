@@ -53,5 +53,32 @@ namespace MyLittleQuiz.Models
 
             return pools;
         }
+
+        public int GetPoolValueForAnswer(int answerId)
+        {
+            string sqlQuery = $"SELECT ScoreModifier FROM score_modifiers WHERE IdPool={this.Id} AND IdAnswer={answerId}";
+            int value = 0;
+
+            SqlConnection con = new SqlConnection();
+            con.databaseConnection.Open();
+            MySqlCommand cmd = new MySqlCommand(sqlQuery, con.databaseConnection);
+            MySqlDataReader dr = cmd.ExecuteReader();
+
+            /*if (!dr.HasRows)
+            {
+                con.databaseConnection.Close();
+                return 0;
+            }*/
+
+            if (dr.Read())
+            {
+                value = Convert.ToInt32(dr["ScoreModifier"]);
+                
+            }
+
+            con.databaseConnection.Close();
+
+            return value;
+        }
     }
 }
