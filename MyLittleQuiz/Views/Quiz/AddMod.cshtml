@@ -9,16 +9,17 @@
 @{
 	
 }
-<ul>
-@foreach(var mod in Model.Users){
-	<li>@mod.Login</li>
-}
-</ul>
+
 
 <form asp-action="AddPool">
 	<div class="form-group">
-		<label asp-for="Name"></label>
-		<input asp-for="Name"></input>
+		<label asp-for="Name" ></label>
+		<select asp-for="Name">
+			@foreach (var mod in Model.Users)
+			{
+				<option>@mod.Login</option>
+			}
+		</select>
 		<span asp-validation-for="Name"></span>
 	</div>
 	<div class="form-group">

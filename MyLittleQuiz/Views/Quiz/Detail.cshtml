@@ -25,7 +25,7 @@
                         @mod.Login
                         @if(Model.IsModerator)
                         {
-                            <a class="btn-danger" asp-route-id="@mod.UserId" asp-route-quizId="@Model.Quiz.Id" asp-controller="Quiz" asp-action="DeleteMod">Delete</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-route-id="@mod.UserId" asp-route-quizId="@Model.Quiz.Id" asp-controller="Quiz" asp-action="DeleteMod">Delete</a>
                         }
                         
                     </li>
@@ -33,7 +33,7 @@
             </ul>
             @if (Model.IsModerator)
             {
-                <a class="btn btn-danger" asp-route-id="@Model.Quiz.Id" asp-controller="Quiz" asp-action="AddMod">Add editor</a>
+                <a class="btn btn-danger btn-sm" asp-route-id="@Model.Quiz.Id" asp-controller="Quiz" asp-action="AddMod">Add editor</a>
             }
 
             @if(Model.IsModerator)

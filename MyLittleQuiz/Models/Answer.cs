@@ -3,6 +3,7 @@
     public class Answer
     {
         public int Id { get; set; }
+        public int AnswerNumber { get; set; }
         public string AnswerText { get; set; }
         List<ScoreModifier> ScoreModifiers { get; set; }
         public Question Question { get; set; }
